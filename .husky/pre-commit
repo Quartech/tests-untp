@@ -1,4 +1,17 @@
 #!/usr/bin/env sh
 . "$(dirname -- "$0")/_/husky.sh"
 
-yarn lint
+# Get list of changed files (staged for commit)
+changed_files=$(git diff --cached --name-only --diff-filter=ACM)
+
+# Define patterns for JavaScript/TypeScript related files in relevant directories
+# Excludes package.json files to avoid linting on dependency changes
+js_patterns="packages/.*\.(js|jsx|ts|tsx)$|e2e/.*\.(js|jsx|ts|tsx)$|digitallink_toolkit_server/.*\.(js|jsx|ts|tsx)$|documentation/.*\.(js|jsx|ts|tsx)$"
+
+# Check if any changed files match JavaScript patterns
+if echo "$changed_files" | grep -qE "$js_patterns"; then
+  echo "JavaScript/TypeScript files detected in staged changes. Running lint..."
+  yarn lint
+else
+  echo "No JavaScript/TypeScript files in relevant directories changed. Skipping lint."
+fi
